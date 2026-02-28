@@ -1,0 +1,65 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    beeps (0.3.9)
+      rucy (~> 0.3.9, >= 0.3.9)
+      xot (~> 0.3.9, >= 0.3.9)
+    ostruct (0.6.3)
+    processing (1.1.13)
+      rays (~> 0.3.9, >= 0.3.9)
+      reflexion (~> 0.3.10, >= 0.3.10)
+      rexml
+      rucy (~> 0.3.9, >= 0.3.9)
+      xot (~> 0.3.9, >= 0.3.9)
+    rake (13.3.1)
+    rays (0.3.9)
+      rucy (~> 0.3.9, >= 0.3.9)
+      xot (~> 0.3.9, >= 0.3.9)
+    reflexion (0.3.10)
+      rays (~> 0.3.9, >= 0.3.9)
+      rucy (~> 0.3.9, >= 0.3.9)
+      xot (~> 0.3.9, >= 0.3.9)
+    reight (0.1.13)
+      beeps (~> 0.3.9, >= 0.3.9)
+      processing (~> 1.1, >= 1.1.13)
+      rays (~> 0.3.9, >= 0.3.9)
+      reflexion (~> 0.3.10, >= 0.3.10)
+      rubysketch (~> 0.7.14, >= 0.7.14)
+      rucy (~> 0.3.9, >= 0.3.9)
+      xot (~> 0.3.9, >= 0.3.9)
+    rexml (3.4.4)
+    rubysketch (0.7.14)
+      beeps (~> 0.3.9, >= 0.3.9)
+      processing (~> 1.1, >= 1.1.13)
+      rays (~> 0.3.9, >= 0.3.9)
+      reflexion (~> 0.3.10, >= 0.3.10)
+      rucy (~> 0.3.9, >= 0.3.9)
+      xot (~> 0.3.9, >= 0.3.9)
+    rucy (0.3.9)
+      xot (~> 0.3.9, >= 0.3.9)
+    xot (0.3.9)
+
+PLATFORMS
+  arm64-darwin-24
+  ruby
+
+DEPENDENCIES
+  ostruct (~> 0.6.3)
+  rake
+  reight
+
+CHECKSUMS
+  beeps (0.3.9) sha256=b27b89de57a15a022d75f7f93e66c5363a519a631af6fb44841e9677c5fcaf58
+  ostruct (0.6.3) sha256=95a2ed4a4bd1d190784e666b47b2d3f078e4a9efda2fccf18f84ddc6538ed912
+  processing (1.1.13) sha256=94ffc89a22269a2f8383102f728c015d1a371b369fff740d9dc6fbc814506644
+  rake (13.3.1) sha256=8c9e89d09f66a26a01264e7e3480ec0607f0c497a861ef16063604b1b08eb19c
+  rays (0.3.9) sha256=a9fe60e55f4d4efe27a718d054f459b71b31d73533b26106e1a92f3fc6c61c05
+  reflexion (0.3.10) sha256=cd7d6445be6dc985faef0266420519b7ec2e9add379524fc9262f29e235cc0fd
+  reight (0.1.13) sha256=46edac6f03d06a3bd59ab367ef1d647ec0d992322efa173f1341b1086bdbb93b
+  rexml (3.4.4) sha256=19e0a2c3425dfbf2d4fc1189747bdb2f849b6c5e74180401b15734bc97b5d142
+  rubysketch (0.7.14) sha256=0f0a5985b60727e45bc9c41e6a1caa70342525091192a935eb980fc10686b63a
+  rucy (0.3.9) sha256=ba62688eefbaeec862250d0bfc42022ab7e30b5de3d9f1e1e77693d4b4316b3a
+  xot (0.3.9) sha256=1849dff85707ec7b79b1fa7b0ac47cd22ed38e232c0fc565fe699addcc640e9f
+
+BUNDLED WITH
+  4.0.3
