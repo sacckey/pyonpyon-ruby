@@ -4,6 +4,8 @@
 class Game
   def initialize()
     @current_oy = 0
+    # ジャンプをロックするフラグ
+    @jump_locked = false
     # 画面を揺らす量
     @shake = 0
 
@@ -76,9 +78,11 @@ class Game
 
   def key_down(key)
     # SPACE キーが押されたら
-    if key == SPACE
+    if key == SPACE && !@jump_locked
       # 上方向の速度を与えてジャンプ
       @player.vy = -150
+      # ジャンプ後は、ブロックに当たるまでジャンプを禁止
+      @jump_locked = true
       # 0番目のサウンドを再生する
       project.sounds[0].play
     end
@@ -122,6 +126,10 @@ class Game
           @gameover = true
           # 2番目のサウンドを再生する
           project.sounds[2].play
+        when [0, 16] # 相手がブロックなら
+          # ブロックに当たったらジャンプを再許可
+          @jump_locked = false
+          sp.vel = Vector.new(0, -150)
         end
       end
       # アニメーションのフレーム用カウンター変数
