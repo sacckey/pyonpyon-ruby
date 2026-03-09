@@ -36,6 +36,9 @@ class Game
 
     # 画面を揺らす量が十分に小さな値になったらゼロにしておく
     @shake = 0 if @shake < 0.1
+
+    # カメラの表示範囲より下に落ちたらゲームオーバー
+    @gameover = true if player.bottom > (@current_oy + height)
   end
 
   # 秒間60回呼ばれるのでゲーム画面を描画する
