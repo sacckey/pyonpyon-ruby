@@ -3,6 +3,7 @@
 # ゲームを実装したクラス
 class Game
   def initialize()
+    @current_oy = 0
     # 画面を揺らす量
     @shake = 0
 
@@ -37,7 +38,10 @@ class Game
 
   # 秒間60回呼ばれるのでゲーム画面を描画する
   def draw()
-    ox, oy = player.x - width / 2, 0
+    ox = 0
+    # 上方向（yが小さくなる方向）にだけ追従し、下方向には戻さない
+    @current_oy = [@current_oy, player.y - height / 2].min
+    oy = @current_oy
     screenOffset ox, oy
 
     # 背景を黒でクリア
