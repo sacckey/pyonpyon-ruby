@@ -27,6 +27,11 @@ class Game
     @state = :ready
     # 復帰先チェックポイント（プレイヤー座標）
     @checkpoint = { x: 96, y: 50 }
+    # 残り時間（秒）
+    @time_left = 30.0
+    # 時間計測用の直前時刻
+    @last_tick_at = nil
+    @score = 0
 
     size width / 2, height / 2
 
@@ -39,6 +44,10 @@ class Game
 
     # 重力を (x, y) で設定
     gravity(0, 500)
+  end
+
+  def now()
+    Time.now.to_f
   end
 
   def count_down(count = 3, &block)
@@ -55,11 +64,13 @@ class Game
 
   def start_game()
     @state = :playing
+    @last_tick_at = now
   end
 
   def restart_from_fall()
     @state = :count_down
     @jump_locked = false
+    @last_tick_at = nil
 
     player.x, player.y = @checkpoint.values_at(:x, :y)
     player.vel = Vector.new(0, 0)
@@ -71,6 +82,14 @@ class Game
   # 描画前にゲームの状態を更新する
   def update()
     return unless @state == :playing
+
+    # playing 中だけ時間を減らす
+    current = now
+    if @last_tick_at
+      @time_left -= current - @last_tick_at
+      @time_left = 0 if @time_left < 0
+    end
+    @last_tick_at = current
 
     # 左右カーソルキーでプレイヤースプライトのx軸方向の速度を更新
     player.vx -= 10 if player.vx > -50 && key_is_down(LEFT)
@@ -87,6 +106,17 @@ class Game
 
     # カメラの表示範囲より下に落ちたらチェックポイントから復帰
     restart_from_fall if player.bottom > (@current_oy + height)
+  end
+
+  def draw_hud()
+    fill(255)
+    text_size(12)
+
+    text_align(LEFT, TOP)
+    text(format("Time: %04.1f", @time_left), 4, 4, width, height)
+
+    text_align(RIGHT, TOP)
+    text("Score: #{@score.to_i.abs}", 0, 4, width - 4, height)
   end
 
   def draw_state()
@@ -110,6 +140,8 @@ class Game
     @current_oy = [@current_oy, player.y - height / 2].min
     oy = @current_oy
     screenOffset ox, oy
+
+    @score = [@score, @current_oy].min
 
     # 背景を黒でクリア
     background(0)
@@ -140,6 +172,7 @@ class Game
       text("Game Over!", 0, 0, width, height)
     end
 
+    draw_hud
     draw_state
   end
 
