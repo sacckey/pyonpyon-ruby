@@ -6,7 +6,7 @@ class Game
     [nil, nil, nil, nil],
     [nil, nil, nil, nil],
     [:block, nil, nil, nil],
-    [:checkpoint_block, :active_checkpoint_block, nil, nil],
+    [:checkpoint_block, :active_checkpoint_block, :cracked_block, nil],
     [:spike, :coin, nil, nil],
   ]
   CHIP_OXY_BY_KIND =
@@ -224,6 +224,18 @@ class Game
 
             set_chip_kind(other, :active_checkpoint_block)
             @checkpoint = { x: other.x, y: other.y - 10 }
+
+            project.sounds[1].play
+          end
+        when :cracked_block # ひび割れブロック
+          if sp.bottom <= other.top + 1 # ブロックの上に着地したときだけブロックを壊す
+            @jump_locked = false
+            sp.vel = Vector.new(0, -150)
+
+            stage.delete(other)
+            remove_sprite(other)
+
+            project.sounds[2].play
           end
         end
 
