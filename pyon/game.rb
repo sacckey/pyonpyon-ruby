@@ -68,6 +68,8 @@ class Game
   end
 
   def restart_from_fall()
+    return unless @state == :playing
+
     @state = :count_down
     @jump_locked = false
     @last_tick_at = nil
@@ -77,6 +79,11 @@ class Game
     @current_oy = player.y - height / 2
 
     count_down { start_game }
+  end
+
+  def gameover()
+    @state = :gameover
+    @last_tick_at = nil
   end
 
   # 描画前にゲームの状態を更新する
@@ -90,6 +97,7 @@ class Game
       @time_left = 0 if @time_left < 0
     end
     @last_tick_at = current
+    return gameover if @time_left <= 0
 
     # 左右カーソルキーでプレイヤースプライトのx軸方向の速度を更新
     player.vx -= 10 if player.vx > -50 && key_is_down(LEFT)
@@ -124,6 +132,7 @@ class Game
       case @state
       when :ready      then "Press Space"
       when :count_down then @count_down_text
+      when :gameover   then "Game Over!"
       else return
       end
 
@@ -158,18 +167,6 @@ class Game
       translate(-ox, -oy)
       # ステージのスプライト、プレイヤーの順に描画する
       sprite(*stage, player)
-    end
-
-    # ゲームオーバーなら表示する
-    if @gameover
-      # 塗りつぶしの色を赤に
-      fill(255, 0, 0)
-      # 文字サイズ
-      text_size(16)
-      # text(str, x, y, w, h) の x, y, w, h の中心にテキストを表示する
-      text_align(CENTER, CENTER)
-      # Game Over! の文字を画面の中心に描画する
-      text("Game Over!", 0, 0, width, height)
     end
 
     draw_hud
@@ -235,14 +232,8 @@ class Game
           # 1番目のサウンドを再生する
           project.sounds[1].play
         when :spike # 相手がトゲなら
-          # トゲからプレイヤー向きの単位ベクトルを作る
-          dir       = (sp.pos - other.pos).normalize
-          # 弾かれるようにプライヤーの速度ベクトルを更新
-          sp.vel    = dir * 200
-          # 画面を揺らす
-          @shake    = 5
-          # ゲームオーバーフラグを立てる
-          @gameover = true
+          # トゲ接触は落下と同じ扱いでチェックポイント復帰
+          restart_from_fall
           # 2番目のサウンドを再生する
           project.sounds[2].play
         when :block, :active_checkpoint_block # ブロック
