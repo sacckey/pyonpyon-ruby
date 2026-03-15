@@ -10,6 +10,8 @@ class Game
     @shake = 0
     # ゲーム進行状態
     @state = :ready
+    # 復帰先チェックポイント（プレイヤー座標）
+    @checkpoint = { x: 100, y: 50 }
 
     size width / 2, height / 2
 
@@ -40,6 +42,17 @@ class Game
     @state = :playing
   end
 
+  def restart_from_fall()
+    @state = :count_down
+    @jump_locked = false
+
+    player.x, player.y = @checkpoint.values_at(:x, :y)
+    player.vel = Vector.new(0, 0)
+    @current_oy = player.y - height / 2
+
+    count_down { start_game }
+  end
+
   # 描画前にゲームの状態を更新する
   def update()
     return unless @state == :playing
@@ -57,8 +70,8 @@ class Game
     # 画面を揺らす量が十分に小さな値になったらゼロにしておく
     @shake = 0 if @shake < 0.1
 
-    # カメラの表示範囲より下に落ちたらゲームオーバー
-    @gameover = true if player.bottom > (@current_oy + height)
+    # カメラの表示範囲より下に落ちたらチェックポイントから復帰
+    restart_from_fall if player.bottom > (@current_oy + height)
   end
 
   def draw_state()
@@ -146,8 +159,8 @@ class Game
     # 次回呼び出しからは保持している生成済みのインスタンスを返す
     @player ||= project.chips.at(0, 0, 8, 8).to_sprite.tap do |sp|
       # インスタンス生成する初回のみ初期化処理を実行
-      # スプライトの初期位置を指定
-      sp.x, sp.y = 100, 50
+      # スプライトの初期位置をチェックポイントに合わせる
+      sp.x, sp.y = @checkpoint.values_at(:x, :y)
       # 物理演算で動けるスプライトにする
       sp.dynamic = true
       # スプライトが他のスプライトと衝突した際に呼ばれる
