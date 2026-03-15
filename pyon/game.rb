@@ -8,6 +8,8 @@ class Game
     @jump_locked = false
     # 画面を揺らす量
     @shake = 0
+    # ゲーム進行状態
+    @state = :ready
 
     size width / 2, height / 2
 
@@ -16,14 +18,32 @@ class Game
       [*stage, player].each do
         add_sprite(_1)
       end
-
-      # 重力を (x, y) で設定
-      gravity(0, 500)
     end
+
+    # 重力を (x, y) で設定
+    gravity(0, 500)
+  end
+
+  def count_down(count = 3, &block)
+    if count == 0
+      project.sounds[1].play
+      @count_down_text = nil
+      block.call
+    else
+      project.sounds[0].play
+      @count_down_text = count.to_s
+      set_timeout(1) {count_down count - 1, &block}
+    end
+  end
+
+  def start_game()
+    @state = :playing
   end
 
   # 描画前にゲームの状態を更新する
   def update()
+    return unless @state == :playing
+
     # 左右カーソルキーでプレイヤースプライトのx軸方向の速度を更新
     player.vx -= 10 if player.vx > -50 && key_is_down(LEFT)
     player.vx += 10 if player.vx < +50 && key_is_down(RIGHT)
@@ -39,6 +59,20 @@ class Game
 
     # カメラの表示範囲より下に落ちたらゲームオーバー
     @gameover = true if player.bottom > (@current_oy + height)
+  end
+
+  def draw_state()
+    state_text =
+      case @state
+      when :ready      then "Press Space"
+      when :count_down then @count_down_text
+      else return
+      end
+
+    fill(255)
+    text_size(30)
+    text_align(CENTER, CENTER)
+    text(state_text, 0, 0, width, height)
   end
 
   # 秒間60回呼ばれるのでゲーム画面を描画する
@@ -75,19 +109,28 @@ class Game
       # text(str, x, y, w, h) の x, y, w, h の中心にテキストを表示する
       text_align(CENTER, CENTER)
       # Game Over! の文字を画面の中心に描画する
-      text("Game Over!", 0, 0, width / 2, height / 2)
+      text("Game Over!", 0, 0, width, height)
     end
+
+    draw_state
   end
 
   def key_down(key)
-    # SPACE キーが押されたら
-    if key == SPACE && !@jump_locked
-      # 上方向の速度を与えてジャンプ
-      @player.vy = -150
-      # ジャンプ後は、ブロックに当たるまでジャンプを禁止
-      @jump_locked = true
-      # 0番目のサウンドを再生する
-      project.sounds[0].play
+    case @state
+    when :ready
+      return unless key == SPACE
+      @state = :count_down
+      count_down {start_game}
+    when :playing
+      # SPACE キーが押されたら
+      if key == SPACE && !@jump_locked
+        # 上方向の速度を与えてジャンプ
+        @player.vy = -150
+        # ジャンプ後は、ブロックに当たるまでジャンプを禁止
+        @jump_locked = true
+        # 0番目のサウンドを再生する
+        project.sounds[0].play
+      end
     end
   end
 
