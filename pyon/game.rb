@@ -209,6 +209,14 @@ class Game
     sprite.oy = oy
   end
 
+  def jump_from_block_top?(sp, other)
+    return false unless sp.bottom <= other.top + 1
+
+    @jump_locked = false
+    sp.vel = Vector.new(0, -150)
+    true
+  end
+
   # プレイヤースプライト
   def player()
     # スプライトエディターの画像から位置と大きさを指定してスプライトを生成
@@ -237,28 +245,20 @@ class Game
           # 2番目のサウンドを再生する
           project.sounds[2].play
         when :block, :active_checkpoint_block # ブロック
-          if sp.bottom <= other.top + 1 # ブロックの上に着地したときだけジャンプを許可する
-            @jump_locked = false
-            sp.vel = Vector.new(0, -150)
-          end
+          # ブロックの上に着地したときだけジャンプを許可する
+          jump_from_block_top?(sp, other)
         when :checkpoint_block # チェックポイントブロック
-          if sp.bottom <= other.top + 1 # ブロックの上に着地したときだけチェックポイントを更新する
-            @jump_locked = false
-            sp.vel = Vector.new(0, -150)
-
+          # ブロックの上に着地したときだけチェックポイントを更新する
+          if jump_from_block_top?(sp, other)
             set_chip_kind(other, :active_checkpoint_block)
             @checkpoint = { x: other.x, y: other.y - 10 }
-
             project.sounds[1].play
           end
         when :cracked_block # ひび割れブロック
-          if sp.bottom <= other.top + 1 # ブロックの上に着地したときだけブロックを壊す
-            @jump_locked = false
-            sp.vel = Vector.new(0, -150)
-
+          # ブロックの上に着地したときだけブロックを壊す
+          if jump_from_block_top?(sp, other)
             stage.delete(other)
             remove_sprite(other)
-
             project.sounds[2].play
           end
         end
