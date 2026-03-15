@@ -2,6 +2,14 @@
 
 # ゲームを実装したクラス
 class Game
+  CHIP_POS = [
+    [nil, nil, nil, nil],
+    [nil, nil, nil, nil],
+    [:block, nil, nil, nil],
+    [nil, nil, nil, nil],
+    [:spike, :coin, nil, nil],
+  ]
+
   def initialize()
     @current_oy = 0
     # ジャンプをロックするフラグ
@@ -166,15 +174,15 @@ class Game
       # スプライトが他のスプライトと衝突した際に呼ばれる
       sp.contact do |other|
         # 衝突した相手を、スプライト画像の位置をもとに判別
-        case [other.ox, other.oy] # ox, oy は offsetx, offsety
-        when [8, 32] # 相手がコインなら
+        case CHIP_POS[other.oy.to_i / 8]&.[](other.ox.to_i / 8)
+        when :coin # 相手がコインなら
           # コインを配列から消す
           stage.delete(other)
           # コインスプライトを物理エンジンからも削除する
           remove_sprite(other)
           # 1番目のサウンドを再生する
           project.sounds[1].play
-        when [0, 32] # 相手がトゲなら
+        when :spike # 相手がトゲなら
           # トゲからプレイヤー向きの単位ベクトルを作る
           dir       = (sp.pos - other.pos).normalize
           # 弾かれるようにプライヤーの速度ベクトルを更新
@@ -185,7 +193,7 @@ class Game
           @gameover = true
           # 2番目のサウンドを再生する
           project.sounds[2].play
-        when [0, 16] # ブロック
+        when :block # ブロック
           if sp.bottom <= other.top + 1 # ブロックの上に着地したときだけジャンプを許可する
             @jump_locked = false
             sp.vel = Vector.new(0, -150)
