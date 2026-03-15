@@ -34,8 +34,10 @@ class Game
     # 時間計測用の直前時刻
     @last_tick_at = nil
     @score = 0
+    @cracked_block_spawns = nil
 
     size width / 2, height / 2
+    cracked_block_spawns
 
     set_timeout do
       # 全スプライトを追加して物理演算処理用に登録しておく
@@ -75,6 +77,7 @@ class Game
     @state = :count_down
     @jump_locked = false
     @last_tick_at = nil
+    restore_cracked_blocks
 
     player.x, player.y = @checkpoint.values_at(:x, :y)
     player.vel = Vector.new(0, 0)
@@ -198,6 +201,29 @@ class Game
   def stage()
     # ステージ用のマップデータからスプライトを生成
     @stage ||= project.maps[0].sprites
+  end
+
+  def cracked_block_spawns()
+    @cracked_block_spawns ||= stage
+      .select {|sp| chip_kind(sp) == :cracked_block}
+      .map {|sp| {x: sp.x, y: sp.y, w: sp.w, h: sp.h, z: sp.z}}
+  end
+
+  def restore_cracked_blocks()
+    ox, oy = CHIP_OXY_BY_KIND[:cracked_block]
+    cracked_block_spawns.each do |spawn|
+      exists = stage.any? do |sp|
+        chip_kind(sp) == :cracked_block && sp.x == spawn[:x] && sp.y == spawn[:y]
+      end
+      next if exists
+
+      sp = project.chips.at(ox, oy, spawn[:w], spawn[:h]).to_sprite
+      sp.x = spawn[:x]
+      sp.y = spawn[:y]
+      sp.z = spawn[:z]
+      stage << sp
+      add_sprite(sp)
+    end
   end
 
   def chip_kind(sprite)
