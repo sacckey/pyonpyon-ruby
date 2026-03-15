@@ -2,11 +2,13 @@
 
 # ゲームを実装したクラス
 class Game
+  MOVING_BLOCK_SPEED = 0.4
+
   CHIP_POS = [
     [nil, nil, nil, nil],
     [nil, nil, nil, nil],
     [:block, nil, nil, nil],
-    [:checkpoint_block, :active_checkpoint_block, :cracked_block, nil],
+    [:checkpoint_block, :active_checkpoint_block, :cracked_block, :moving_block, :moving_block_edge],
     [:spike, :coin, nil, nil],
   ]
   CHIP_OXY_BY_KIND =
@@ -88,6 +90,7 @@ class Game
 
   # 描画前にゲームの状態を更新する
   def update()
+    moving_blocks
     return unless @state == :playing
 
     # playing 中だけ時間を減らす
@@ -244,7 +247,7 @@ class Game
           restart_from_fall
           # 2番目のサウンドを再生する
           project.sounds[2].play
-        when :block, :active_checkpoint_block # ブロック
+        when :block, :active_checkpoint_block, :moving_block, :moving_block_edge # ブロック
           # ブロックの上に着地したときだけジャンプを許可する
           jump_from_block_top?(sp, other)
         when :checkpoint_block # チェックポイントブロック
@@ -271,6 +274,44 @@ class Game
         # スプライトの画像の参照位置（ox は offset x の略）を
         # 交互に 0 と 24 になるようにしてアニメーションさせる
         sp.ox = (count += 1) % 2 == 0 ? 0 : 24
+      end
+    end
+  end
+
+  def moving_blocks()
+    @moving_block_edges ||= stage.select {|sp| chip_kind(sp) == :moving_block_edge}
+    @moving_blocks ||= stage.select {|sp| chip_kind(sp) == :moving_block}.tap do |blocks|
+      blocks.each do |sp|
+        sp[:moving_dir] = 1
+        sp[:moving_speed] = MOVING_BLOCK_SPEED
+        sp[:moving_base_y] = sp.y
+        edges = @moving_block_edges.select {|edge| edge.y == sp.y}.sort_by(&:x)
+        left  = edges.select {|edge| edge.x <= sp.x}.last
+        right = edges.find {|edge| edge.x >= sp.x}
+        if left && right && left != right
+          sp[:moving_enabled] = true
+          sp[:moving_min_x] = left.right
+          sp[:moving_max_x] = right.x - sp.w
+        else
+          sp[:moving_enabled] = false
+        end
+      end
+    end
+
+    @moving_blocks.each do |sp|
+      sp.y = sp[:moving_base_y]
+      next unless @state == :playing
+      next unless sp[:moving_enabled]
+
+      next_x = sp.x + sp[:moving_dir] * sp[:moving_speed]
+      if next_x < sp[:moving_min_x]
+        sp.x = sp[:moving_min_x]
+        sp[:moving_dir] = 1
+      elsif next_x > sp[:moving_max_x]
+        sp.x = sp[:moving_max_x]
+        sp[:moving_dir] = -1
+      else
+        sp.x = next_x
       end
     end
   end
