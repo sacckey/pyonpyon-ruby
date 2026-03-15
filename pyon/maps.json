@@ -6274,6 +6274,11 @@
         "h": 128,
         "chip_size": 8,
         "chips": [
+          [
+            46,
+            0.0,
+            -256.0
+          ],
           null,
           null,
           null,
@@ -6289,6 +6294,16 @@
           null,
           null,
           null,
+          [
+            46,
+            0.0,
+            -248.0
+          ],
+          [
+            46,
+            8.0,
+            -248.0
+          ],
           null,
           null,
           null,
@@ -6303,11 +6318,16 @@
           null,
           null,
           null,
-          null,
-          null,
-          null,
-          null,
-          null,
+          [
+            46,
+            0.0,
+            -240.0
+          ],
+          [
+            46,
+            8.0,
+            -240.0
+          ],
           null,
           null,
           null,

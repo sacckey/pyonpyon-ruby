@@ -3,6 +3,8 @@
 # ゲームを実装したクラス
 class Game
   MOVING_BLOCK_SPEED = 0.4
+  START_CHECKPOINT = {x: 96, y: 50}.freeze
+  TIME_LIMIT = 30.0
 
   CHIP_POS = [
     [nil, nil, nil, nil],
@@ -28,9 +30,9 @@ class Game
     # ゲーム進行状態
     @state = :ready
     # 復帰先チェックポイント（プレイヤー座標）
-    @checkpoint = { x: 96, y: 50 }
+    @checkpoint = START_CHECKPOINT.dup
     # 残り時間（秒）
-    @time_left = 30.0
+    @time_left = TIME_LIMIT
     # 時間計測用の直前時刻
     @last_tick_at = nil
     @score = 0
@@ -89,6 +91,30 @@ class Game
   def gameover()
     @state = :gameover
     @last_tick_at = nil
+  end
+
+  def reset_to_initial()
+    stage.each {remove_sprite(_1)}
+    remove_sprite(@player) if @player
+    project.clear_all_sprites
+
+    @stage = nil
+    @moving_blocks = nil
+    @moving_block_edges = nil
+    @cracked_block_spawns = nil
+
+    @checkpoint = START_CHECKPOINT.dup
+    @time_left = TIME_LIMIT
+    @last_tick_at = nil
+    @score = 0
+    @current_oy = 0
+    @shake = 0
+    @jump_locked = false
+    @count_down_text = nil
+
+    [*stage, player].each {add_sprite(_1)}
+    player.x, player.y = @checkpoint.values_at(:x, :y)
+    player.vel = Vector.new(0, 0)
   end
 
   # 描画前にゲームの状態を更新する
@@ -183,6 +209,11 @@ class Game
     case @state
     when :ready
       return unless key == SPACE
+      @state = :count_down
+      count_down {start_game}
+    when :gameover
+      return unless key == SPACE
+      reset_to_initial
       @state = :count_down
       count_down {start_game}
     when :playing

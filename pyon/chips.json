@@ -1,5 +1,5 @@
 {
-  "next_id": 159,
+  "next_id": 160,
   "chips": [
     {
       "id": 1,
@@ -1220,12 +1220,21 @@
       "y": 0,
       "w": 32,
       "h": 32,
-      "shape": "rect"
+      "shape": "rect",
+      "sensor": true
     },
     {
       "id": 158,
       "x": 56,
       "y": 0,
+      "w": 32,
+      "h": 32,
+      "shape": "rect"
+    },
+    {
+      "id": 159,
+      "x": 72,
+      "y": 8,
       "w": 32,
       "h": 32,
       "shape": "rect"
