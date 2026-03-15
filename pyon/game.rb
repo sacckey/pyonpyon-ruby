@@ -172,11 +172,13 @@ class Game
           @gameover = true
           # 2番目のサウンドを再生する
           project.sounds[2].play
-        when [0, 16] # 相手がブロックなら
-          # ブロックに当たったらジャンプを再許可
-          @jump_locked = false
-          sp.vel = Vector.new(0, -150)
+        when [0, 16] # ブロック
+          if sp.bottom <= other.top + 1 # ブロックの上に着地したときだけジャンプを許可する
+            @jump_locked = false
+            sp.vel = Vector.new(0, -150)
+          end
         end
+
       end
       # アニメーションのフレーム用カウンター変数
       count = 0
