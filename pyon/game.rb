@@ -6,9 +6,16 @@ class Game
     [nil, nil, nil, nil],
     [nil, nil, nil, nil],
     [:block, nil, nil, nil],
-    [nil, nil, nil, nil],
+    [:checkpoint_block, :active_checkpoint_block, nil, nil],
     [:spike, :coin, nil, nil],
   ]
+  CHIP_OXY_BY_KIND =
+    CHIP_POS.each_with_index.with_object({}) do |(row, oy), map|
+      row.each_with_index do |kind, ox|
+        next unless kind
+        map[kind] = [ox * 8, oy * 8]
+      end
+    end.freeze
 
   def initialize()
     @current_oy = 0
@@ -19,7 +26,7 @@ class Game
     # ゲーム進行状態
     @state = :ready
     # 復帰先チェックポイント（プレイヤー座標）
-    @checkpoint = { x: 100, y: 50 }
+    @checkpoint = { x: 96, y: 50 }
 
     size width / 2, height / 2
 
@@ -160,6 +167,18 @@ class Game
     @stage ||= project.maps[0].sprites
   end
 
+  def chip_kind(sprite)
+    CHIP_POS[sprite.oy.to_i / 8]&.[](sprite.ox.to_i / 8)
+  end
+
+  def set_chip_kind(sprite, kind)
+    ox, oy = CHIP_OXY_BY_KIND[kind]
+    return unless ox && oy
+
+    sprite.ox = ox
+    sprite.oy = oy
+  end
+
   # プレイヤースプライト
   def player()
     # スプライトエディターの画像から位置と大きさを指定してスプライトを生成
@@ -174,7 +193,7 @@ class Game
       # スプライトが他のスプライトと衝突した際に呼ばれる
       sp.contact do |other|
         # 衝突した相手を、スプライト画像の位置をもとに判別
-        case CHIP_POS[other.oy.to_i / 8]&.[](other.ox.to_i / 8)
+        case chip_kind(other)
         when :coin # 相手がコインなら
           # コインを配列から消す
           stage.delete(other)
@@ -193,10 +212,18 @@ class Game
           @gameover = true
           # 2番目のサウンドを再生する
           project.sounds[2].play
-        when :block # ブロック
+        when :block, :active_checkpoint_block # ブロック
           if sp.bottom <= other.top + 1 # ブロックの上に着地したときだけジャンプを許可する
             @jump_locked = false
             sp.vel = Vector.new(0, -150)
+          end
+        when :checkpoint_block # チェックポイントブロック
+          if sp.bottom <= other.top + 1 # ブロックの上に着地したときだけチェックポイントを更新する
+            @jump_locked = false
+            sp.vel = Vector.new(0, -150)
+
+            set_chip_kind(other, :active_checkpoint_block)
+            @checkpoint = { x: other.x, y: other.y - 10 }
           end
         end
 
