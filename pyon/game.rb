@@ -7,7 +7,7 @@ class Game
   TIME_LIMIT = 30.0
 
   CHIP_POS = [
-    [nil, nil, nil, nil],
+    [nil, nil, nil, nil, :nil, :goal],
     [nil, nil, nil, nil],
     [:block, nil, nil, nil],
     [:checkpoint_block, :active_checkpoint_block, :cracked_block, :moving_block, :moving_block_edge],
@@ -93,6 +93,13 @@ class Game
     @last_tick_at = nil
   end
 
+  def clear()
+    return unless @state == :playing
+
+    @state = :clear
+    @last_tick_at = nil
+  end
+
   def reset_to_initial()
     stage.each {remove_sprite(_1)}
     remove_sprite(@player) if @player
@@ -164,6 +171,7 @@ class Game
       case @state
       when :ready      then "Press Space"
       when :count_down then @count_down_text
+      when :clear      then "Clear!"
       when :gameover   then "Game Over!"
       else return
       end
@@ -304,6 +312,8 @@ class Game
           restart_from_fall
           # 2番目のサウンドを再生する
           project.sounds[2].play
+        when :goal # ゴール
+          clear
         when :block, :active_checkpoint_block, :moving_block, :moving_block_edge # ブロック
           # ブロックの上に着地したときだけジャンプを許可する
           jump_from_block_top?(sp, other)
