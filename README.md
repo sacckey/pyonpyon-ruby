@@ -19,5 +19,5 @@ $ bundle exec r8 pyon
 $ bundle exec r8 pyon
 ```
 
-方向キー(← →): 左右移動
+方向キー(← →): 左右移動  
 スペースキー: ジャンプ
