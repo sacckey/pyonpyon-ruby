@@ -3,6 +3,7 @@
 レトロゲームエンジン Reight (R8) で作ったアクションゲームです。
 
 ## スクリーンショット
+![Image](https://github.com/user-attachments/assets/e1aa3631-9768-4c6f-9a4b-cd42d783cf01)
 
 ## インストール
 
